@@ -1,5 +1,6 @@
 use location::{Location, Locations, LocationLabel};
 
+#[derive(Debug)]
 pub struct Jump {
     pub source: Location,
     pub destination: Location,
@@ -66,16 +67,20 @@ fn calculate_score(source: &Location, destination: &Location) -> usize {
         // its cheap to go from word begin to word begin
         (LocationLabel::WordBegin, LocationLabel::WordBegin) => {
             score + 2
-        }
+        },
 
         // ending on a word begin is only slightly more expensive
         (_, LocationLabel::WordBegin) => {
             score + 3
         },
 
+        (LocationLabel::PathBegin, _) => {
+            score + 5
+        }
+
         _ => {
             // if the locations are contiguous then its _very_ cheap
-            if (destination.index - source.index == 1) {
+            if (destination.index == source.index + 1) {
                 score + 1
             
             // otherwise its expensive
@@ -83,5 +88,79 @@ fn calculate_score(source: &Location, destination: &Location) -> usize {
                 score + 5
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn jump_count() {
+        let jumps = Jumps::new("ab");
+        // ^ => a | ^ => b | ^ => $
+        // a => b | a => $
+        // b => $
+        assert_eq!(6, jumps.count());
+    }
+
+    #[test]
+    fn jump_source_characters() {
+        let jumps: Vec<Jump> = Jumps::new("ab").collect();
+        // ^ => a | ^ => b | ^ => $
+        // a => b | a => $
+        // b => $
+
+        let actual: Vec<char> = Jumps::new("ab")
+            .map(|jump| jump.source.character)
+            .collect();
+
+        let expected = vec![
+            '^', '^', '^',
+            'a', 'a',
+            'b'
+        ];
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn jump_destination_characters() {
+        let jumps: Vec<Jump> = Jumps::new("ab").collect();
+        // ^ => a | ^ => b | ^ => $
+        // a => b | a => $
+        // b => $
+
+        let actual: Vec<char> = Jumps::new("ab")
+            .map(|jump| jump.destination.character)
+            .collect();
+
+        let expected = vec![
+            'a', 'b', '$',
+            'b', '$',
+            '$'
+        ];
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn jump_scores() {
+        let jumps: Vec<Jump> = Jumps::new("ab").collect();
+        // ^ => a | ^ => b | ^ => $
+        // a => b | a => $
+        // b => $
+
+        let actual: Vec<usize> = Jumps::new("ab")
+            .map(|jump| jump.score)
+            .collect();
+
+        let expected = vec![
+            3, 5, 0,
+            1, 0,
+            0
+        ];
+
+        assert_eq!(expected, actual);
     }
 }

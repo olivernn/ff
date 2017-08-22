@@ -5,3 +5,5 @@ authors = ["Oliver Nightingale <oliven@amazon.com>"]
 
 [dependencies]
 unicode-segmentation = "1.2.0"
+termion = "1"
+walkdir = "1"

@@ -12,7 +12,7 @@ pub enum LocationLabel {
     PathEnd
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Location {
     pub index: usize,
     pub height: usize,
@@ -70,26 +70,6 @@ impl<'a> Locations<'a> {
             path_end: Some(path_end)
         }
     }
-
-    fn path_begin(&self) -> Location {
-        Location {
-            index: 0,
-            character: '^',
-            label: LocationLabel::PathBegin,
-            height: 0,
-            prefix: String::from("")
-        }
-    }
-
-    fn path_end(&self) -> Location {
-        Location {
-            index: self.source.len(),
-            character: '$',
-            label: LocationLabel::PathEnd,
-            height: 0,
-            prefix: self.source.to_owned()
-        }
-    }
 }
 
 impl<'a> Iterator for Locations<'a> {
@@ -117,7 +97,7 @@ impl<'a> Iterator for Locations<'a> {
                         character: character,
                         label: label,
                         height: self.height_map[&index],
-                        prefix: self.source[..index].to_owned()
+                        prefix: self.source[...index].to_owned()
                     }
                 })
                 .or_else(|| {
@@ -126,7 +106,7 @@ impl<'a> Iterator for Locations<'a> {
                         character: character,
                         label: LocationLabel::WordBegin,
                         height: self.height_map[&index],
-                        prefix: self.source[..index].to_owned()
+                        prefix: self.source[...index].to_owned()
                     })
                 });
             
@@ -144,6 +124,11 @@ mod tests {
     use super::*;
 
     #[test]
+    fn count() {
+        assert_eq!(4, Locations::new("ab").count());
+    }
+
+    #[test]
     fn simple() {
         let locations: Vec<Location> = Locations::new("ab").collect();
 
@@ -151,13 +136,13 @@ mod tests {
         assert_eq!(locations[1].character, 'a');
         assert_eq!(locations[1].label, LocationLabel::WordBegin);
         assert_eq!(locations[1].height, 0);
-        assert_eq!(locations[1].prefix, "");
+        assert_eq!(locations[1].prefix, "a");
 
         assert_eq!(locations[2].index, 1);
         assert_eq!(locations[2].character, 'b');
         assert_eq!(locations[2].label, LocationLabel::Simple);
         assert_eq!(locations[2].height, 0);
-        assert_eq!(locations[2].prefix, "a");
+        assert_eq!(locations[2].prefix, "ab");
     }
 
     #[test]
@@ -168,7 +153,7 @@ mod tests {
         assert_eq!(locations[3].character, 'b');
         assert_eq!(locations[3].label, LocationLabel::WordBegin);
         assert_eq!(locations[3].height, 0);
-        assert_eq!(locations[3].prefix, "a_");
+        assert_eq!(locations[3].prefix, "a_b");
     }
 
     #[test]
@@ -179,7 +164,7 @@ mod tests {
         assert_eq!(locations[3].character, 'b');
         assert_eq!(locations[3].label, LocationLabel::WordBegin);
         assert_eq!(locations[3].height, 0);
-        assert_eq!(locations[3].prefix, "a-");
+        assert_eq!(locations[3].prefix, "a-b");
     }
 
     #[test]
@@ -190,7 +175,7 @@ mod tests {
         assert_eq!(locations[2].character, 'B');
         assert_eq!(locations[2].label, LocationLabel::WordBegin);
         assert_eq!(locations[2].height, 0);
-        assert_eq!(locations[2].prefix, "a");
+        assert_eq!(locations[2].prefix, "aB");
     }
 
     #[test]
@@ -201,6 +186,6 @@ mod tests {
         assert_eq!(locations[3].character, 'b');
         assert_eq!(locations[3].label, LocationLabel::WordBegin);
         assert_eq!(locations[3].height, 0);
-        assert_eq!(locations[3].prefix, "a/");
+        assert_eq!(locations[3].prefix, "a/b");
     }
 }

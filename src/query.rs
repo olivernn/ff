@@ -3,8 +3,10 @@ use std::cmp::{Eq, PartialEq, PartialOrd, Ord, Ordering};
 use std::hash::{Hash, Hasher};
 
 use index::{Graph, Node, Edge};
+use query_result::{QueryResult, QueryResults};
 use min_set::MinSet;
 
+#[derive(Debug)]
 struct Cursor {
     node: Node,
     score: usize,
@@ -52,12 +54,29 @@ impl Cursor {
     }
 }
 
+#[derive(Debug)]
 struct Step {
     character: char,
     cursors: HashSet<Cursor>
 }
 
 impl Step {
+    fn first() -> Step {
+        let cursor = Cursor {
+            node: String::from(""),
+            score: 0,
+            positions: Vec::new()
+        };
+
+        let mut cursors = HashSet::new();
+        cursors.insert(cursor);
+
+        Step {
+            character: '^',
+            cursors: cursors
+        }
+    }
+
     fn new(character: char) -> Step {
         Step {
             character: character,
@@ -82,10 +101,11 @@ impl Step {
     }
 }
 
+#[derive(Debug)]
 pub struct Match {
-    path: String,
-    score: usize,
-    positions: Vec<usize>
+    pub path: String,
+    pub score: usize,
+    pub positions: Vec<usize>
 }
 
 impl From<Cursor> for Match {
@@ -126,27 +146,6 @@ impl Eq for Match {
 
 }
 
-pub struct Matches {
-    heap: BinaryHeap<Match>
-}
-
-impl Matches {
-    fn new() -> Matches {
-        Matches { heap: BinaryHeap::new() }
-    }
-    fn insert(&mut self, m: Match) {
-        self.heap.push(m)
-    }
-}
-
-impl Iterator for Matches {
-    type Item =  Match;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.heap.pop()
-    }
-}
-
 pub struct Query<'a> {
     graph: &'a Graph,
     steps: Vec<Step>
@@ -154,7 +153,7 @@ pub struct Query<'a> {
 
 impl<'a> Query<'a> {
     pub fn new(graph: &'a Graph) -> Query<'a> {
-        let step = Step::new('^');
+        let step = Step::first();
 
         Query {
             graph: graph,
@@ -162,10 +161,10 @@ impl<'a> Query<'a> {
         }
     }
 
-    pub fn matches(&self) -> Matches {
+    pub fn results(&self) -> QueryResults {
         let mut match_set: MinSet<Match> = MinSet::new();
 
-        let mut matches = Matches::new();
+        let mut results = QueryResults::new();
 
         for cursor in &self.current_step().cursors {
             let edge_map = &self.graph[&cursor.node];
@@ -180,10 +179,10 @@ impl<'a> Query<'a> {
         }
 
         for m in match_set.into_iter() {
-            matches.insert(m);
+            results.insert(m.into());
         }
 
-        return matches;
+        return results;
     }
 
     pub fn advance(&mut self, character: char) {
