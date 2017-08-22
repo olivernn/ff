@@ -1,0 +1,7 @@
+[package]
+name = "ff"
+version = "0.1.0"
+authors = ["Oliver Nightingale <oliven@amazon.com>"]
+
+[dependencies]
+unicode-segmentation = "1.2.0"
