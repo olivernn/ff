@@ -204,7 +204,9 @@ impl<'a> Query<'a> {
     }
 
     pub fn back(&mut self) {
-        self.steps.pop();
+        if self.steps.len() > 1 {
+            self.steps.pop();
+        }
     }
 
     fn current_step(&self) -> &Step {
