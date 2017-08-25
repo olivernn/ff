@@ -4,7 +4,6 @@ use std::fmt;
 
 use jump::{Jumps, Jump};
 use query::Query;
-use query_result::QueryResult;
 
 pub type Node = String;
 
@@ -60,13 +59,13 @@ impl Index {
 
 impl fmt::Debug for Index {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "\n");
+        try!(write!(f, "\n"));
         for (location, edge_map) in &self.graph {
-            writeln!(f, "'{}' =>", location);
+            try!(writeln!(f, "'{}' =>", location));
             for (character, edges) in edge_map {
-                writeln!(f, "\t{} =>", character);
+                try!(writeln!(f, "\t{} =>", character));
                 for edge in edges {
-                    writeln!(f, "\t\t{:?}", edge);
+                    try!(writeln!(f, "\t\t{:?}", edge));
                 };
             };
         };

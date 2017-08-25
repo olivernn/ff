@@ -1,7 +1,6 @@
 use std::cmp::{Eq, Ord};
 use std::hash::Hash;
 use std::collections::HashSet;
-use std::collections::hash_set::Iter;
 
 pub struct MinSet<T: Ord + Hash + Eq> {
     set: HashSet<T>
@@ -28,10 +27,6 @@ impl<T: Ord + Hash + Eq> MinSet<T> {
                 self.set.insert(element);
             }
         }
-    }
-
-    pub fn iter(&self) -> Iter<T> {
-        self.set.iter()
     }
 }
 

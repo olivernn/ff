@@ -80,7 +80,7 @@ fn calculate_score(source: &Location, destination: &Location) -> usize {
 
         _ => {
             // if the locations are contiguous then its _very_ cheap
-            if (destination.index == source.index + 1) {
+            if destination.index == source.index + 1 {
                 score + 1
             
             // otherwise its expensive

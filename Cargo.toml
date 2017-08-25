@@ -7,3 +7,4 @@ authors = ["Oliver Nightingale <oliven@amazon.com>"]
 unicode-segmentation = "1.2.0"
 termion = "1"
 walkdir = "1"
+time = "0.1"

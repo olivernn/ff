@@ -1,5 +1,6 @@
 #![feature(inclusive_range_syntax)]
 extern crate unicode_segmentation;
+extern crate termion;
 
 mod location;
 mod jump;

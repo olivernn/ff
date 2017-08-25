@@ -1,6 +1,3 @@
-use unicode_segmentation::{UnicodeSegmentation, GraphemeIndices};
-
-use std::slice::Iter;
 use std::str::CharIndices;
 use std::collections::HashMap;
 
@@ -76,7 +73,7 @@ impl<'a> Iterator for Locations<'a> {
     type Item = Location;
 
     fn next(&mut self) -> Option<Location> {
-        if (self.path_begin.is_some()) {
+        if self.path_begin.is_some() {
             return self.path_begin.take();
         }
 

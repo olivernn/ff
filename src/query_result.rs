@@ -1,12 +1,31 @@
-use std::collections::BinaryHeap;
+use termion::style;
+
+use std::collections::{BinaryHeap, HashSet};
 use std::cmp::Ordering;
+use std::iter::FromIterator;
+use std::fmt;
 
 use query::Match;
 
 pub struct QueryResult {
     pub path: String,
     pub score: usize,
-    pub positions: Vec<usize>
+    pub positions: HashSet<usize>
+}
+
+impl fmt::Display for QueryResult {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.path.char_indices()
+            .map(|(i, c)| {
+                match self.positions.contains(&i) {
+                    true => write!(f, "{}{}{}", style::Bold, c, style::Reset),
+                    false => write!(f, "{}", c)
+                }
+            })
+            .fold(Ok(()), |acc, r| {
+                acc.and(r)
+            })
+    }
 }
 
 impl From<Match> for QueryResult {
@@ -14,7 +33,7 @@ impl From<Match> for QueryResult {
         QueryResult {
             path: m.path,
             score: m.score,
-            positions: m.positions
+            positions: HashSet::from_iter(m.positions.into_iter())
         }
     }
 }

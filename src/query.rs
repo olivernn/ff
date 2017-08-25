@@ -1,9 +1,10 @@
-use std::collections::{HashSet, BinaryHeap};
+use std::collections::HashSet;
 use std::cmp::{Eq, PartialEq, PartialOrd, Ord, Ordering};
 use std::hash::{Hash, Hasher};
+use std::fmt;
 
 use index::{Graph, Node, Edge};
-use query_result::{QueryResult, QueryResults};
+use query_result::QueryResults;
 use min_set::MinSet;
 
 #[derive(Debug)]
@@ -211,5 +212,12 @@ impl<'a> Query<'a> {
 
     fn current_step(&self) -> &Step {
         self.steps.last().expect("it should be impossible to have no steps")
+    }
+}
+
+impl<'a> fmt::Display for Query<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let query_string: String = self.steps.iter().map(|step| step.character).collect();
+        write!(f, "{}", query_string)
     }
 }
