@@ -77,7 +77,7 @@ impl fmt::Debug for Index {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use query::*;
+    use query_result::*;
 
     #[test]
     fn query_match() {

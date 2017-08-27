@@ -10,7 +10,8 @@ pub struct Jump {
 pub struct Jumps {
     locations: Vec<Location>,
     source_index: usize,
-    destination_index: usize
+    destination_index: usize,
+    upper_jumps: Vec<Jump>
 }
 
 impl Jumps {
@@ -20,7 +21,8 @@ impl Jumps {
         Jumps {
             locations: locations,
             source_index: 0,
-            destination_index: 1
+            destination_index: 1,
+            upper_jumps: Vec::new()
         }
     }
 }
@@ -29,6 +31,10 @@ impl Iterator for Jumps {
     type Item = Jump;
 
     fn next(&mut self) -> Option<Jump> {
+        if self.upper_jumps.len() > 0 {
+            return self.upper_jumps.pop();
+        }
+
         if self.destination_index >= self.locations.len() {                                                                                                             
             self.source_index = self.source_index + 1;                                                                                                        
             self.destination_index  = self.source_index + 1;                                                                                                       
@@ -42,6 +48,21 @@ impl Iterator for Jumps {
         let destination = &self.locations[self.destination_index];
 
         let score = calculate_score(&source, &destination);
+
+        if destination.character.is_uppercase() {
+            for lower_destination_character in destination.character.to_lowercase() {
+                let mut lower_destination = destination.clone();
+                lower_destination.character = lower_destination_character;
+
+                self.upper_jumps.push(
+                    Jump {
+                        source: source.clone(),
+                        destination: lower_destination,
+                        score: score - 1
+                    }
+                )
+            }
+        }
 
         let jump = Jump {
             source: source.clone(),
@@ -106,7 +127,6 @@ mod tests {
 
     #[test]
     fn jump_source_characters() {
-        let jumps: Vec<Jump> = Jumps::new("ab").collect();
         // ^ => a | ^ => b | ^ => $
         // a => b | a => $
         // b => $
@@ -126,7 +146,6 @@ mod tests {
 
     #[test]
     fn jump_destination_characters() {
-        let jumps: Vec<Jump> = Jumps::new("ab").collect();
         // ^ => a | ^ => b | ^ => $
         // a => b | a => $
         // b => $
@@ -146,7 +165,6 @@ mod tests {
 
     #[test]
     fn jump_scores() {
-        let jumps: Vec<Jump> = Jumps::new("ab").collect();
         // ^ => a | ^ => b | ^ => $
         // a => b | a => $
         // b => $
@@ -159,6 +177,21 @@ mod tests {
             3, 5, 0,
             1, 0,
             0
+        ];
+
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn mixed_case_jumps() {
+        let actual: Vec<char> = Jumps::new("aB")
+            .map(|jump| jump.destination.character)
+            .collect();
+
+        let expected = vec![
+            'a', 'B', 'b', '$',
+            'B', 'b', '$',
+            '$'
         ];
 
         assert_eq!(expected, actual);
