@@ -1,34 +1,23 @@
 extern crate termion;
-extern crate walkdir;
 extern crate time;
 extern crate ff;
 
 use std::io::{Write, stdout, stdin};
+use std::env;
 
 use time::PreciseTime;
-
-use walkdir::{WalkDir, DirEntry, WalkDirIterator};
 
 use termion::raw::IntoRawMode;
 use termion::event::Key;
 use termion::input::TermRead;
 
-use ff::index::Index;
+use ff::index;
 use ff::query::Query;
 
 fn main() {
-    let mut index = Index::new();
-
     let start = PreciseTime::now();
-
-    for entry in WalkDir::new("/Users/oliven/code/ff").into_iter().filter_entry(|e| !is_hidden(e)) {
-        let entry = entry.unwrap();
-        let path = entry.path();        
-        let path = path.strip_prefix("/Users/oliven/code/ff").expect("should work");
-
-        index.push(path.to_str().expect("should work"));
-    }
-
+    let root = env::current_dir().expect("unable to get current dir");
+    let index = index::build(root);
     let indexing_time = start.to(PreciseTime::now());
 
     let mut query = index.query();
@@ -70,11 +59,4 @@ fn render<T: Write>(io: &mut T, query: &Query) {
     for result in query.results().take(10) {
         writeln!(io, "{}\r", result).unwrap();
     }
-}
-
-fn is_hidden(entry: &DirEntry) -> bool {
-    entry.file_name()
-         .to_str()
-         .map(|s| s.starts_with("."))
-         .unwrap_or(false)
 }

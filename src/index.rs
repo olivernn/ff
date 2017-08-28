@@ -1,6 +1,9 @@
 use std::collections::HashMap;
 use std::convert::From;
 use std::fmt;
+use std::path::Path;
+
+use ignore::Walk;
 
 use jump::{Jumps, Jump};
 use query::Query;
@@ -27,6 +30,19 @@ impl From<Jump> for Edge {
 pub type Edges = HashMap<char, Vec<Edge>>;
 
 pub type Graph = HashMap<String, Edges>;
+
+pub fn build<P: AsRef<Path>>(root: P) -> Index {
+    let mut index = Index::new();
+
+    for result in Walk::new(root) {
+        match result {
+            Ok(entry) => index.push(entry.path().to_str().expect("unable to convert path to str")),
+            Err(err) => println!("ERROR: {}", err)
+        }
+    }
+
+    return index;
+}
 
 pub struct Index {
     graph: Graph

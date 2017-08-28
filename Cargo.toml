@@ -4,7 +4,6 @@ version = "0.1.0"
 authors = ["Oliver Nightingale <oliven@amazon.com>"]
 
 [dependencies]
-unicode-segmentation = "1.2.0"
 termion = "1"
-walkdir = "1"
 time = "0.1"
+ignore = "0.2.2"
