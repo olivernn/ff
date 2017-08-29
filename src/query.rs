@@ -210,6 +210,10 @@ impl<'a> Query<'a> {
         }
     }
 
+    pub fn query_string(&self) -> String {
+        self.steps.iter().map(|step| step.character).collect()
+    }
+
     fn current_step(&self) -> &Step {
         self.steps.last().expect("it should be impossible to have no steps")
     }

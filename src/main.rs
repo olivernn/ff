@@ -12,7 +12,7 @@ use termion::event::Key;
 use termion::input::TermRead;
 
 use ff::index;
-use ff::query::Query;
+use ff::ui::Screen;
 
 fn main() {
     let start = PreciseTime::now();
@@ -21,6 +21,7 @@ fn main() {
     let indexing_time = start.to(PreciseTime::now());
 
     let mut query = index.query();
+    let mut screen = Screen::new();
 
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
@@ -38,25 +39,25 @@ fn main() {
             Key::Char(c) => {
                 writeln!(stdout, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
                 query.advance(c);
-                render(&mut stdout, &query);
+                screen.current_query(&query);
             },
             Key::Backspace => {
                 writeln!(stdout, "{}{}", termion::clear::All, termion::cursor::Goto(1, 1)).unwrap();
                 query.back();
-                render(&mut stdout, &query);
+                screen.current_query(&query);
+            },
+            Key::Down => {
+                screen.move_selection_down();
+            },
+            Key::Up => {
+                screen.move_selection_up();
             }
             _ => println!("other")
         }
 
+        write!(stdout, "{}", screen).expect("failed to write to screen");
         stdout.flush().unwrap();
     }
 
     write!(stdout, "{}", termion::cursor::Show).unwrap();
-}
-
-fn render<T: Write>(io: &mut T, query: &Query) {
-    writeln!(io, "{}", query).unwrap();
-    for result in query.results().take(10) {
-        writeln!(io, "{}\r", result).unwrap();
-    }
 }
