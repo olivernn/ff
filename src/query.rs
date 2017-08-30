@@ -211,7 +211,7 @@ impl<'a> Query<'a> {
     }
 
     pub fn query_string(&self) -> String {
-        self.steps.iter().map(|step| step.character).collect()
+        self.steps.iter().skip(1).map(|step| step.character).collect()
     }
 
     fn current_step(&self) -> &Step {
