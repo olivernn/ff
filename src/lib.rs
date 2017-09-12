@@ -8,7 +8,7 @@ pub mod index;
 pub mod query;
 pub mod ui;
 mod min_set;
-mod query_result;
+pub mod query_result;
 
 #[cfg(test)]
 mod tests {

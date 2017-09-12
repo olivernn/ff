@@ -10,6 +10,7 @@ use termion::input::TermRead;
 
 use ff::index;
 use ff::ui::Screen;
+use ff::query_result::{QueryResult};
 
 fn main() {
     let root = env::current_dir().expect("unable to get current dir");
@@ -17,6 +18,7 @@ fn main() {
 
     let mut query = index.query();
     let mut screen = Screen::new();
+    let mut output: Option<QueryResult> = None;
 
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
@@ -27,6 +29,10 @@ fn main() {
     for c in stdin.keys() {
         match c.unwrap() {
             Key::Ctrl('c') => break,
+            Key::Char('\n') => {
+                output = screen.selected;
+                break
+            },
             Key::Char(c) => {
                 query.advance(c);
                 screen.current_query(&query);
@@ -40,7 +46,7 @@ fn main() {
             },
             Key::Up => {
                 screen.move_selection_up();
-            }
+            },
             _ => println!("other")
         }
 
@@ -48,5 +54,14 @@ fn main() {
         stdout.flush().unwrap();
     }
 
-    write!(stdout, "{}", termion::cursor::Show).unwrap();
+    writeln!(stdout, "{}", termion::cursor::Show);
+
+    match output {
+        Some(result) => {
+            writeln!(stdout, "{}", result.path)
+        },
+        _ => {
+            Ok(())
+        }
+    };
 }

@@ -11,7 +11,7 @@ static PROMPT: &'static str = ">>> ";
 pub struct Screen {
     query_string: String,
     pre_selected: VecDeque<QueryResult>,
-    selected: Option<QueryResult>,
+    pub selected: Option<QueryResult>,
     post_selected: VecDeque<QueryResult>
 }
 
