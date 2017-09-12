@@ -1,5 +1,6 @@
 extern crate termion;
 extern crate ff;
+extern crate libc;
 
 use std::io::{Write, stdout, stdin};
 use std::env;
@@ -10,15 +11,22 @@ use termion::input::TermRead;
 
 use ff::index;
 use ff::ui::Screen;
-use ff::query_result::{QueryResult};
+use ff::query_result::QueryResult;
+
+use std::fs::File;
+use std::os::unix::io::IntoRawFd;
 
 fn main() {
-    let root = env::current_dir().expect("unable to get current dir");
-    let index = index::build(root);
+    let index = build_index();
 
     let mut query = index.query();
     let mut screen = Screen::new();
     let mut output: Option<QueryResult> = None;
+
+    unsafe {
+        let tty = File::open("/dev/tty").unwrap();
+        libc::dup2(tty.into_raw_fd(), libc::STDIN_FILENO);
+    }
 
     let stdin = stdin();
     let mut stdout = stdout().into_raw_mode().unwrap();
@@ -64,4 +72,18 @@ fn main() {
             Ok(())
         }
     };
+}
+
+fn build_index() -> index::Index {
+    if is_stdin_tty() {
+        let root = env::current_dir().expect("unable to get current dir");
+        return index::from_path(root);
+    } else {
+        let stdin = stdin();
+        return index::from_buf_reader(stdin.lock());
+    }
+}
+
+fn is_stdin_tty() -> bool {
+    0 < unsafe { libc::isatty(libc::STDIN_FILENO) }
 }

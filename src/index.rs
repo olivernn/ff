@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::convert::From;
 use std::fmt;
 use std::path::Path;
+use std::io::BufRead;
 
 use ignore::Walk;
 
@@ -31,7 +32,7 @@ pub type Edges = HashMap<char, Vec<Edge>>;
 
 pub type Graph = HashMap<String, Edges>;
 
-pub fn build<P: AsRef<Path>>(root: P) -> Index {
+pub fn from_path<P: AsRef<Path>>(root: P) -> Index {
     let mut index = Index::new();
 
     for result in Walk::new(root) {
@@ -39,6 +40,16 @@ pub fn build<P: AsRef<Path>>(root: P) -> Index {
             Ok(entry) => index.push(entry.path().to_str().expect("unable to convert path to str")),
             Err(err) => println!("ERROR: {}", err)
         }
+    }
+
+    return index;
+}
+
+pub fn from_buf_reader<T: BufRead>(source: T) -> Index {
+    let mut index = Index::new();
+
+    for line in source.lines() {
+        index.push(&line.unwrap());
     }
 
     return index;
