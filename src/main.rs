@@ -8,6 +8,7 @@ use std::env;
 use termion::raw::IntoRawMode;
 use termion::event::Key;
 use termion::input::TermRead;
+use termion::screen::AlternateScreen;
 
 use ff::index;
 use ff::ui::Screen;
@@ -29,7 +30,10 @@ fn main() {
     }
 
     let stdin = stdin();
-    let mut stdout = stdout().into_raw_mode().unwrap();
+    // let mut stdout = stdout().into_raw_mode().unwrap();
+    //let mut stdout = AlternateScreen::from(stdout().into_raw_mode().unwrap());
+    //let mut stdout = File::open("/dev/tty").expect("unable to open tty").into_raw_mode().expect("unable to convert to raw");
+    let mut stdout = AlternateScreen::from(termion::get_tty().expect("get tty").into_raw_mode().expect("into raw mode"));
 
     write!(stdout, "{}", screen).expect("failed to render screen");
     stdout.flush().unwrap();
@@ -64,14 +68,18 @@ fn main() {
 
     writeln!(stdout, "{}", termion::cursor::Show);
 
+    drop(stdout);
+
     match output {
         Some(result) => {
-            writeln!(stdout, "{}", result.path)
+            writeln!(std::io::stdout(), "{}", result.path)
         },
         _ => {
             Ok(())
         }
     };
+
+    std::io::stdout().flush();
 }
 
 fn build_index() -> index::Index {
