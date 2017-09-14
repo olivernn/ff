@@ -35,9 +35,12 @@ pub type Graph = HashMap<String, Edges>;
 pub fn from_path<P: AsRef<Path>>(root: P) -> Index {
     let mut index = Index::new();
 
-    for result in Walk::new(root) {
+    for result in Walk::new(&root) {
         match result {
-            Ok(entry) => index.push(entry.path().to_str().expect("unable to convert path to str")),
+            Ok(entry) => {
+                let relative_path = entry.path().strip_prefix(&root).expect("make path relative");
+                index.push(relative_path.to_str().expect("unable to convert path to str"))
+            },
             Err(err) => println!("ERROR: {}", err)
         }
     }
