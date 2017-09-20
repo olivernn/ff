@@ -35,6 +35,8 @@ fn main() {
             termion::get_tty().expect("get tty").into_raw_mode().expect("into raw mode")
         );
 
+        screen.current_query(&query);
+
         write!(stdout, "{}", screen).expect("failed to render screen");
         stdout.flush().unwrap();
 
