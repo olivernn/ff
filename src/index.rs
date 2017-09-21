@@ -38,8 +38,10 @@ pub fn from_path<P: AsRef<Path>>(root: P) -> Index {
     for result in Walk::new(&root) {
         match result {
             Ok(entry) => {
-                let relative_path = entry.path().strip_prefix(&root).expect("make path relative");
-                index.push(relative_path.to_str().expect("unable to convert path to str"))
+                if entry.file_type().map(|ft| ft.is_file()).unwrap_or(false) {
+                    let relative_path = entry.path().strip_prefix(&root).expect("make path relative");
+                    index.push(relative_path.to_str().expect("unable to convert path to str"))
+                }
             },
             Err(err) => println!("ERROR: {}", err)
         }
